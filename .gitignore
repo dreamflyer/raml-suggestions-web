@@ -1,0 +1,14 @@
+/node_modules
+
+/temp
+
+/site/*.js
+
+/.idea
+
+/coverage
+
+*.iml
+
+.project
+.settings
