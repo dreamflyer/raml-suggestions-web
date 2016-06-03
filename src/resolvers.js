@@ -92,32 +92,5 @@ var FsTreeModel = (function () {
     return FsTreeModel;
 })();
 
-//
-// function getVirtualFsContent(filePath) {
-//     var text = fsResolver.content(filePath);
-//
-//     return {
-//         getText: function() {
-//             return text;
-//         },
-//
-//         getPath: function () {
-//             return filePath;
-//         },
-//
-//         getBaseName: function() {
-//             return path.basename(filePath);
-//         }
-//     }
-// }
-//
-// function getPosition(offset) {
-//     return {
-//         getOffset: function() {
-//             return offset;
-//         }
-//     }
-// }
-
 exports.FsResolver = FsResolver;
 exports.FsTreeModel = FsTreeModel;
