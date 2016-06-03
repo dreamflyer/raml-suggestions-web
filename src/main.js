@@ -1,11 +1,64 @@
 var suggestions = require("raml-suggestions");
-var fsTree = require("./fsTree");
 
-var atom = require("atom-web-ui");
+var fsTree = require("./fsTree");
 
 var resolvers = require("./resolvers");
 
-var completionProvider = new suggestions.CompletionProvider(resolvers.completionContentProvider);
+var fsResolver = new resolvers.FsResolver();
+
+var completionContentProvider = suggestions.getContentProvider(fsResolver);
+
+var completionProvider = new suggestions.CompletionProvider(completionContentProvider);
+
+
+
+var EditorContent = (function () {
+    function EditorContent(textEditor) {
+        this.textEditor = textEditor;
+    }
+    
+    EditorContent.prototype.getText = function () {
+        return this.textEditor.getBuffer().getText();
+    };
+    
+    EditorContent.prototype.getPath = function () {
+        return this.textEditor.getPath();
+    };
+    
+    EditorContent.prototype.getBaseName = function () {
+        return this.textEditor.getTitle();
+    };
+    
+    return EditorContent;
+})();
+
+//{ editor: this.editor, prefix: prefix, bufferPosition: this.editor.getCursorBufferPosition() };
+
+var EditorPosition = (function () {
+    function EditorPosition(textEditor) {
+        this.textEditor = textEditor;
+    }
+    
+    EditorPosition.prototype.getOffset = function () {
+        var cursorPosition = this.textEditor.getCursorBufferPosition();
+        
+        return this.textEditor.getBuffer().characterIndexForPosition(cursorPosition);
+    };
+    
+    return EditorPosition;
+})();
+
+
+
+function getSuggestions(editorRequest) {
+    var content = new EditorContent(editorRequest.editor);
+    
+    var position = new EditorPosition(editorRequest.editor);
+    
+    var request = new suggestions.CompletionRequest(content, position);
+
+    return completionProvider.suggest(new suggestions.CompletionRequest(content, position), true);
+}
 
 // function completionByOffset(filePath, offset) {
 //     var content = resolvers.getVirtualFsContent(filePath);
@@ -49,10 +102,6 @@ var completionProvider = new suggestions.CompletionProvider(resolvers.completion
 //
 // pane = workspace.addModalPanel({item: button('asdadasdasd', () => pane.destroy()).renderUI()});
 
-var fsResolver = new resolvers.FsResolver();
-
-var completionContentProvider = suggestions.getContentProvider(fsResolver);
-
 var fsTreeModel = new resolvers.FsTreeModel('/examples', fsResolver);
 
-fsTree.initFsTree(fsTreeModel);
+fsTree.initFsTree(fsTreeModel, getSuggestions);

@@ -4,7 +4,7 @@ var UI = Atom.UI;
 
 var treePanelNode = document.getElementById('fs-tree-panel');
 
-function initFsTree(fsTreeModel) {
+function initFsTree(fsTreeModel, getSuggestionsCallback) {
     var input = fsTreeModel;
     
     function getChildren(file) {
@@ -39,7 +39,7 @@ function initFsTree(fsTreeModel) {
                 return;
             }
 
-            openFile(selection);
+            openFile(selection, getSuggestionsCallback);
         }
     };
     
@@ -65,9 +65,9 @@ var FSRenderer = (function () {
     return FSRenderer;
 })();
 
-function openFile(fsTreeModel) {
+function openFile(fsTreeModel, getSuggestionsCallback) {
     if(!fsTreeModel.isDirectory()) {
-        var textEditor = new Atom.atom.TextEditor(fsTreeModel.path, 'ace_editor', fsTreeModel.resolver);
+        var textEditor = new Atom.atom.TextEditor(fsTreeModel.path, 'ace_editor', fsTreeModel.resolver, getSuggestionsCallback);
 
         Atom.workspace.getActivePane().addItem(textEditor, 0);
     }
