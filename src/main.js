@@ -56,7 +56,7 @@ function getSuggestions(editorRequest) {
     var request = new suggestions.CompletionRequest(content, position);
     
     
-    return completionProvider.suggest(new suggestions.CompletionRequest(content, position), true);
+    return completionProvider.suggest(new suggestions.CompletionRequest(content, position), true) || [];
 }
 
 var fsTreeModel = new resolvers.FsTreeModel('/examples', fsResolver);
