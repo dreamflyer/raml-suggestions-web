@@ -4,30 +4,34 @@ var path = require('path');
 
 var virtualContent = require("../temp/virtualFsContent.json");
 
-var fsResolver = {
-    content: function(filePath) {
+var FsResolver = (function() {
+    function FsResolver() {
+        
+    }
+    
+    FsResolver.prototype.content = function(filePath) {
         return virtualContent[filePath];
-    },
+    }
 
-    list: function(dirPath) {
-        var children = [];
+    FsResolver.prototype.list = function(dirPath) {
+        var children = {};
 
         Object.keys(virtualContent).forEach(function(fullPath) {
             if(fullPath.indexOf(dirPath) === 0) {
                 var child = fullPath.replace(dirPath, '');
 
                 if(child.indexOf('/') === 0) {
-                    child = child.replace('/')
+                    child = child.replace('/', '');
                 }
-
-                children.push(child.split('/')[0]);
+                
+                children[child.split('/')[0]] = true;
             }
         });
 
-        return children;
-    },
+        return Object.keys(children);
+    }
 
-    exists: function(fullPath) {
+    FsResolver.prototype.exists = function(fullPath) {
         if(!fullPath || !fullPath.trim()) {
             return false;
         }
@@ -40,61 +44,80 @@ var fsResolver = {
             return path.indexOf(fullPath === 0);
         }) ? true : false;
     }
-}
 
-var completionContentProvider = {
-    contentDirName: function(content) {
-        return path.dirname(content.getPath());
-    },
-
-    dirname: function(fullPath) {
-        return path.dirname(fullPath);
-    },
-
-    exists: function (fullPath) {
-        return fsResolver.exists(fullPath);
-    },
-
-    resolve: function (contextPath, relativePath) {
-        return path.resolve(contextPath, relativePath);
-    },
-
-    isDirectory: function(fullPath) {
-        return fsResolver.exists && path.extname(fullPath) ? true : false;
-    },
-
-    readdir: function (dirPath) {
-        return fsResolver.list(dirPath);
+    FsResolver.prototype.isDirectory = function(fullPath) {
+        return this.exists(fullPath) && !this.extname(fullPath) ? true : false;
     }
-}
+    
+    FsResolver.prototype.dirname = path.dirname;
+    
+    FsResolver.prototype.resolve = path.resolve;
+    
+    FsResolver.prototype.extname = path.extname;
+    
+    return FsResolver;
+})();
 
-function getVirtualFsContent(filePath) {
-    var text = fsResolver.content(filePath);
+var FsTreeModel = (function () {
+    function FsTreeModel(path, fsResolver) {
+        this.path = path;
+        
+        this.resolver = fsResolver;
+        
+        this.directory = fsResolver.isDirectory(path);
+        
+        var names = (this.directory && this.getName() !== 'node_modules') ? fsResolver.list(path) : [];
+        
+        var children = [];
 
-    return {
-        getText: function() {
-            return text;
-        },
+        names.forEach(function (name) {
+            children.push(new FsTreeModel(path + "/" + name, fsResolver));
+        });
 
-        getPath: function () {
-            return filePath;
-        },
-
-        getBaseName: function() {
-            return path.basename(filePath);
-        }
+        this.children = children;
     }
-}
 
-function getPosition(offset) {
-    return {
-        getOffset: function() {
-            return offset;
-        }
-    }
-}
+    FsTreeModel.prototype.getChildren = function () {
+        return this.children;
+    };
 
-exports.fsResolver = fsResolver;
-exports.completionContentProvider = completionContentProvider;
-exports.getVirtualFsContent = getVirtualFsContent;
-exports.getPosition = getPosition;
+    FsTreeModel.prototype.isDirectory = function () {
+        return this.directory;
+    };
+
+    FsTreeModel.prototype.getName = function () {
+        return path.basename(this.path);
+    };
+
+    return FsTreeModel;
+})();
+
+//
+// function getVirtualFsContent(filePath) {
+//     var text = fsResolver.content(filePath);
+//
+//     return {
+//         getText: function() {
+//             return text;
+//         },
+//
+//         getPath: function () {
+//             return filePath;
+//         },
+//
+//         getBaseName: function() {
+//             return path.basename(filePath);
+//         }
+//     }
+// }
+//
+// function getPosition(offset) {
+//     return {
+//         getOffset: function() {
+//             return offset;
+//         }
+//     }
+// }
+
+exports.FsResolver = FsResolver;
+exports.FsTreeModel = FsTreeModel;

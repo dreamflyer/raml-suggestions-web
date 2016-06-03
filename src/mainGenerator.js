@@ -33,7 +33,8 @@ var config = {
             "libxml-xsd": true,
             "ws": true,
             'raml-1-parser': 'RAML.Parser',
-            'raml-suggestions': 'RAMLSuggestions'
+            'raml-suggestions': 'RAMLSuggestions',
+            'atom-web-ui': 'AtomWeb'
         }
     ],
     node: {

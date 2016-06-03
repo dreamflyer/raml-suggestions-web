@@ -17,6 +17,12 @@ var nodeModules = path.resolve(__dirname, "../node_modules");
 
 var parserBundle = path.resolve(__dirname, "../node_modules/raml-1-parser/browserVersion/raml-1-parser.js");
 
+var atomRoot = path.resolve(__dirname, "../node_modules/atom-web-ui");
+
+var atomGenerator = path.resolve(__dirname, "../node_modules/atom-web-ui/generator/generator.js");
+
+var atomBundle = path.resolve(__dirname, "../node_modules/atom-web-ui/browser/atomWeb.js");
+
 var target = path.resolve(__dirname, '../site');
 
 var examples = path.resolve(__dirname, '../examples');
@@ -33,7 +39,13 @@ spawnSync(isWin ? 'npm.cmd' : 'npm', ['install', '--prefix', parser], {stdio: [0
 
 spawnSync('node', [parserBuilder], {stdio: [0, 1, 2]});
 
+spawnSync(isWin ? 'npm.cmd' : 'npm', ['install', '--prefix', atomRoot], {stdio: [0, 1, 2]});
+
+spawnSync('node', [atomGenerator], {stdio: [0, 1, 2]});
+
 util.copyFileSync(parserBundle, target);
+
+util.copyFileSync(atomBundle, target);
 
 util.convertDirToJson(examples, temp);
 

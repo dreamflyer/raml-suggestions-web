@@ -7,6 +7,7 @@
   "dependencies": {
     "underscore": "^1.8.3",
     "raml-1-parser": "^0.2.20",
-    "raml-suggestions": "^0.0.6"
+    "raml-suggestions": "^0.0.9",
+    "atom-web-ui": "^0.0.12"
   }
 }
